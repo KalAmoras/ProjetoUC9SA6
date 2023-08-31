@@ -3,9 +3,14 @@
 <%@ page isELIgnored="false"%>
 <%@ page import="java.util.List"%>
 <%@ page import="java.sql.Connection"%>
-<%@ page import="controller.NewClientServlet"%>
-<%@ page import="models.Cliente"%>
-<%@ page import="dao.ClienteDAO"%>
+<%@ page import="java.util.ArrayList"%>
+<%@ page import="models.Agendamento"%>
+<%@ page import="dao.AgendamentoDAO"%>
+<%
+@SuppressWarnings("unchecked")
+ArrayList<Agendamento> list = (ArrayList<Agendamento>) request.getAttribute("Schedules");
+%>
+
 <%@ page import="connection.ConnectionMySQL"%>
 
 <!DOCTYPE html>
@@ -54,19 +59,15 @@
 			</button>
 		  </div>
 		<div class="add-cliente" id="formulario-adicionar">
-			<h1 class="main-heading">Adicionar Novo Cliente</h1>
-			<form action="lista" method="post" class="adicionar-form">
+			<h1 class="main-heading">Adicionar Novo Agendamento</h1>
+			<form action="insert" class="adicionar-form">
 				<div class="form-group">
-					<label for="nome">Cliente:</label> <input type="text"
-						maxlength="45" id="nome" name="nome" required>
+					<label for="date">Data:</label> <input type="date"
+						id="nome" name="date" required>
 				</div>
 				<div class="form-group">
-					<label for="endereco">Endereço:</label> <input type="text"
-						maxlength="45" id="endereco" name="endereco" required>
-				</div>
-				<div class="form-group">
-					<label for="modalidade">Modalidade:</label> <input type="text"
-						maxlength="45" id="modalidade" name="modalidade" required>
+					<label for="time">Horário:</label> <input type="time"
+						id="endereco" name="time" required>
 				</div>
 				<div class="justify-content-center d-flex">
 					<button type="submit" class="btn-add mt-3 mb-3">
@@ -76,47 +77,45 @@
 			</form>
 		</div>
 		<div class="lista-clientes">
-		   <h1 class="main-heading">Lista de Clientes</h1>
+		   <h1 class="main-heading">Lista de Agendamentos</h1>
 			<div class="table-div">
 					<table class="custom-table">
 						<thead class="custom-thead">
 						<tr>
-							<th>Matrícula</th>
-							<th>Nome</th>
-							<th>Endereço</th>
-							<th>Modalidade</th>
+							<th>Id</th>
+							<th>Data</th>
+							<th>Horário</th>
 							<th>Editar</th>
 							<th>Deletar</th>
 						</tr>
 						</thead>
 						<tbody class="custom-tbody">
 						<%
-						List<Cliente> clientes = new ClienteDAO().getAllClients();
-						for (Cliente cliente : clientes) {
-						%>
+							if (list != null) {
+							    for (Agendamento agendamento : list) {
+							%>
 						<tr>
-							<td data-label="Matrícula"><span><%=cliente.getMatricula()%></span></td>
-							<td data-label="Nome"><span class="editable" data-field="nome"><%=cliente.getNome()%></span></td>
-							<td data-label="Endereço"><span class="editable" data-field="endereco"><%=cliente.getEndereco()%></span></td>
-							<td data-label="Modalidade"><span class="editable" data-field="modalidade"><%=cliente.getModalidade()%></span></td>
+							<td data-label="Id"><span><%=agendamento.getId()%></span></td>
+							<td data-label="Data"><span class="editable" data-field="date" data-input-type="date"><%=agendamento.getDate()%></span></td>
+							<td data-label="Horario"><span class="editable" data-field="time" data-input-type="time"><%=agendamento.getTime()%></span></td>
 							<td data-label="Editar">
 								<button class="btn btn-warning editar-cliente"
-									data-id="<%=cliente.getMatricula()%>">
+									data-id="<%=agendamento.getId()%>">
 									<i class="fas fa-edit"></i>
 								</button>
 							</td>
 							<td data-label="Deletar">
-								<form action="deletar_cliente" method="post">
-									<input type="hidden" name="matricula"
-										value="<%=cliente.getMatricula()%>">
-									<button type="submit" class="btn btn-danger">
-										<i class="fas fa-trash-alt"></i>
-									</button>
-								</form>
+								<form action="delete" >
+    								<input type="hidden" name="id" value="<%= agendamento.getId() %>">
+									    <button type="submit" class="btn btn-danger">
+									        <i class="fas fa-trash-alt"></i>
+									    </button>
+									</form>
 							</td>
 						</tr>		
 						<%
 						}
+							}
 						%>
 						</tbody>
 					</table>
@@ -147,31 +146,33 @@
             tr.find(".editable").each(function () {
                 var valor = $(this).text();
                 var campo = $(this).data("field");
-                $(this).html("<input style='width: 300px;' maxlength='45' type='text' name='" + campo + "' value='" + valor + "'>");
+                var tipoInput = $(this).data("input-type");
+                $(this).html("<input style='width: 300px;' type='" + tipoInput + "' name='" + campo + "' value='" + valor + "'>");
             });
 
             tr.find(".editar-cliente").replaceWith("<button class='btn btn-success salvar-cliente' data-id='" + clienteId + "'><i class='fas fa-save'></i></button>");
         });
+
         $(document).on("click", ".salvar-cliente", function () {
             var clienteId = $(this).data("id");
             var tr = $(this).closest("tr");
-            var nome = tr.find("[data-field='nome'] input").val();
-            var endereco = tr.find("[data-field='endereco'] input").val();
-            var modalidade = tr.find("[data-field='modalidade'] input").val();
+            var date = tr.find("[data-field='date'] input").val();
+            var time = tr.find("[data-field='time'] input").val();
 
             $.ajax({
                 type: "POST",
-                url: "editar_cliente",
+                url: "update", // Corrija o URL para o servlet de atualização
                 data: {
-                    matricula: clienteId,
-                    nome: nome,
-                    endereco: endereco,
-                    modalidade: modalidade
+                    id: clienteId, // Use 'id' em vez de 'matricula'
+                    date: date,
+                    time: time,
                 },
                 success: function () {
-                    tr.find(".editable[data-field='nome']").html(nome);
-                    tr.find(".editable[data-field='endereco']").html(endereco);
-                    tr.find(".editable[data-field='modalidade']").html(modalidade);
+                	var formattedDate = new Date(date).toLocaleDateString();
+                    var formattedTime = new Date(time).toLocaleTimeString();
+                	
+                    tr.find(".editable[data-field='date']").text(date); // Atualize o texto do campo 'date'
+                    tr.find(".editable[data-field='time']").text(time); // Atualize o texto do campo 'time'
                     tr.find(".salvar-cliente").replaceWith("<button class='btn btn-warning editar-cliente' data-id='" + clienteId + "'><i class='fas fa-edit'></i></button>");
                     tr.find(".btn-danger").show();
                     location.reload();

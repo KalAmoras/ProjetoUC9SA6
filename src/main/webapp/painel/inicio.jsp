@@ -33,7 +33,7 @@
 						</li>
 						<li class="nav-item"><a class="nav-link" href="relatorios">Relatorios</a>
 						</li>-->
-						<li class="nav-item"><a class="nav-link" href="lista">Lista</a>
+						<li class="nav-item"><a class="nav-link" href="main">Agendamentos</a>
 						</li>
 						<li class="nav-item"><a class="nav-link" href="logout">Logout</a>
 						</li>

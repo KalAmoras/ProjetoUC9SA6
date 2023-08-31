@@ -12,7 +12,7 @@
       <div class="landing-page">
         <header>
           <div class="container">
-            <a href="#" class="logo">Shoes<b>Happy</b></a>
+            <a href="#" class="logo">Max<b>System</b></a>
             <ul class="links">
               <li>Home</li>
 			  <li><a href="signup.jsp">Cadastre-se</a></li>
