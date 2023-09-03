@@ -46,6 +46,15 @@ ArrayList<Agendamento> list = (ArrayList<Agendamento>) request.getAttribute("Sch
 				<ul class="navbar-nav">
 					<li class="nav-item"><a class="nav-link" href="index.jsp">Home</a>
 					</li>
+					<li class="nav-item"><%
+						String usuarioAtivo = (String) session.getAttribute("usuario");
+						if (usuarioAtivo != null) {
+						%>
+						<label class="nav-link">User: <%= usuarioAtivo %></label>
+						<%
+						}
+						%>
+					</li>
 					<li class="nav-item"><a class="nav-link" href="logout">Logout</a>
 					</li>
 				</ul>

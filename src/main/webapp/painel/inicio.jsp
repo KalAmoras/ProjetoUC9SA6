@@ -46,7 +46,7 @@
 			<div class="container">
 				<div>
 					<p class="big-text info italic text-center">
-						Shoes<b>Happy</b> AdminControl
+						Max<b>System</b> AdminControl
 					</p>
 				</div>
 				<div class="image">

@@ -23,8 +23,8 @@
         <div class="content">
           <div class="container">
             <div class="info text-center d-flex justify-content-center">
-              <h1>Nós fazemos o seu pé mais feliz!</h1>
-              <p>Encontre aqui os melhores calçados pelos melhores preços!</p>
+              <h1>Evitamos brigas!</h1>
+              <p>O melhor sistema para organizar seu condôminio!</p>
             </div>
             <div class="image">
               <img src="https://i.postimg.cc/65QxYYzh/001234.png">

@@ -22,21 +22,26 @@ public class AgendamentoDAO extends Agendamento {
     	super();
     }
 
-	public void insertSchedule(Agendamento agendamento) {
-        String query = "insert into schedule (date, time) values (?,?)";
-        try ( Connection conn = ConnectionMySQL.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+    public void insertSchedule(Agendamento agendamento) {
+        if (!isScheduleConflict(agendamento) && !isScheduleNearby(agendamento)) {
+            String query = "insert into schedule (date, time) values (?,?)";
+            try (Connection conn = ConnectionMySQL.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setString(1, agendamento.getDate());
-            stmt.setString(2, agendamento.getTime());
-            
-            System.out.print(stmt + "");
+                stmt.setString(1, agendamento.getDate());
+                stmt.setString(2, agendamento.getTime());
 
-            stmt.executeUpdate();
-            System.out.print("DAO adicionado ");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.print("não adicionado");
+                System.out.print(stmt + "");
+
+                stmt.executeUpdate();
+                System.out.print("DAO adicionado ");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.out.print("não adicionado");
+            }
+        } else {
+            // Trate o conflito de horário aqui, por exemplo, lançando uma exceção ou retornando uma mensagem de erro.
+            System.out.print("Conflito de horário: Não foi possível adicionar o agendamento.");
         }
     }
 
@@ -105,5 +110,45 @@ public class AgendamentoDAO extends Agendamento {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }	
+    }
+    public boolean isScheduleConflict(Agendamento agendamento) {
+        String query = "SELECT COUNT(*) FROM schedule WHERE date = ? AND time = ?";
+        try (Connection conn = ConnectionMySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, agendamento.getDate());
+            stmt.setString(2, agendamento.getTime());
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0; // Retorna verdadeiro se já houver agendamento no mesmo horário.
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean isScheduleNearby(Agendamento agendamento) {
+        String query = "SELECT COUNT(*) FROM schedule WHERE date = ? AND " +
+                       "ABS(TIME_TO_SEC(TIMEDIFF(time, ?))) <= 1740";
+        try (Connection conn = ConnectionMySQL.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, agendamento.getDate());
+            stmt.setString(2, agendamento.getTime());
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0; // Retorna verdadeiro se houver um agendamento próximo.
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
